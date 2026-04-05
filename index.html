@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>After Alice | Side Story</title>
+  <link rel="stylesheet" href="./styles.css?v=20260405e">
+</head>
+<body>
+  <div class="app-shell">
+    <div id="coverOverlay" class="cover-overlay" hidden>
+      <div class="cover-panel">
+      <p class="cover-eyebrow">After Alice Part I</p>
+      <h1 class="cover-title">After Alice</h1>
+      <p class="cover-subtitle">A side story about walking out of the garden after it wakes.</p>
+      <div id="coverResidualMark" class="cover-residual-mark-list" hidden aria-hidden="true"></div>
+      <p class="cover-copy">Not every blank thing should be filled at once.</p>
+        <div class="cover-actions">
+          <button id="coverContinueButton" class="cover-button ghost" type="button">Continue</button>
+          <button id="coverStartButton" class="cover-button" type="button">Start from Beginning</button>
+          <button id="coverGalleryButton" class="cover-button ghost" type="button">Gallery</button>
+          <button id="coverCreditsButton" class="cover-button ghost" type="button">Credits</button>
+        </div>
+      </div>
+      <div class="cover-notice" aria-label="Copyright Notice">
+        <p class="cover-notice-copy">Alice Courtyard: After Alice Part I. All rights reserved.</p>
+      </div>
+    </div>
+
+    <main class="player-shell">
+      <section id="stageShell" class="stage-shell" aria-label="Story Stage">
+        <div id="backgroundLayer" class="background-layer"></div>
+        <div class="vignette-layer"></div>
+        <div id="effectOverlay" class="effect-overlay" aria-hidden="true"></div>
+        <div id="cutinOverlay" class="cutin-overlay" aria-hidden="true"></div>
+        <div id="cgFrame" class="cg-frame">
+          <img id="cgLayer" class="cg-layer" alt="" draggable="false">
+        </div>
+
+        <div id="videoShell" class="video-shell" hidden aria-label="Story Video">
+          <video id="videoLayer" class="video-layer" playsinline preload="metadata"></video>
+          <div class="video-overlay">
+            <p id="videoLabel" class="video-label" hidden></p>
+            <button id="videoSkipButton" class="video-skip-button" type="button" hidden>Skip</button>
+          </div>
+        </div>
+
+        <div id="spriteLayer" class="sprite-layer">
+          <img id="spriteLeft" class="sprite-slot left" alt="" draggable="false">
+          <img id="spriteCenter" class="sprite-slot center" alt="" draggable="false">
+          <img id="spriteRight" class="sprite-slot right" alt="" draggable="false">
+        </div>
+
+        <div id="chapterCard" class="chapter-card" aria-hidden="true">
+          <p id="chapterCardEyebrow" class="chapter-card-eyebrow"></p>
+          <h2 id="chapterCardTitle" class="chapter-card-title"></h2>
+          <p id="chapterCardSubtitle" class="chapter-card-subtitle"></p>
+        </div>
+
+        <button id="propCard" class="prop-card" type="button" hidden aria-label="Story Item Insert">
+          <div class="prop-card-frame">
+            <img id="propImage" class="prop-card-image" alt="" draggable="false">
+          </div>
+          <div class="prop-card-copy">
+            <p id="propTitle" class="prop-card-title"></p>
+            <p id="propCaption" class="prop-card-caption"></p>
+          </div>
+        </button>
+      </section>
+
+      <button id="routeBadge" class="route-badge" type="button" aria-expanded="false" aria-controls="routePanel">
+        <span class="route-badge-label">Route Memory</span>
+        <span id="routeBadgeCurrent" class="route-badge-current">梦醒后的庭院</span>
+      </button>
+
+      <section id="routePanel" class="route-panel" hidden aria-label="Route Memory Panel">
+        <div class="route-panel-header">
+          <div class="route-panel-copy">
+            <p class="route-panel-eyebrow">After Alice Route</p>
+            <h2 id="routePanelTitle" class="route-panel-title">Route Memory</h2>
+            <p id="routePanelLocation" class="route-panel-location">梦醒后的庭院</p>
+          </div>
+          <button id="closeRoutePanelButton" class="route-panel-close" type="button">Close</button>
+        </div>
+
+        <p class="route-panel-note">不是地图。只是把我们已经走过的地方，暂时记下来。</p>
+
+        <div id="routeMap" class="route-map" aria-live="polite"></div>
+      </section>
+
+      <section id="textboxShell" class="textbox-shell" aria-live="polite">
+        <div class="textbox-meta">
+          <div class="textbox-meta-left">
+            <p id="speakerTag" class="speaker-tag">Narration</p>
+            <p id="sceneMeta" class="scene-meta">After Alice 番外第一部</p>
+          </div>
+
+          <div class="textbox-tools">
+            <button id="autoButton" class="tool-button" type="button">Auto</button>
+            <button id="hideTextboxButton" class="tool-button" type="button">Hide</button>
+            <button id="backlogButton" class="tool-button" type="button">Replay</button>
+            <button id="settingButton" class="tool-button" type="button">Setting</button>
+          </div>
+        </div>
+
+        <p id="dialogueText" class="dialogue-text"></p>
+
+        <div id="choicePanel" class="choice-panel" hidden aria-live="polite"></div>
+
+        <div class="textbox-footer">
+          <p id="voiceStatus" class="voice-status" hidden>Voice Playing</p>
+          <p id="textboxHint" class="textbox-hint">Tap to continue</p>
+        </div>
+      </section>
+
+      <button id="showTextboxButton" class="show-ui-chip" type="button" hidden>Show</button>
+    </main>
+  </div>
+
+  <div id="settingOverlay" class="overlay-shell" hidden>
+    <div class="overlay-panel setting-panel">
+      <div class="overlay-header">
+        <h2>Setting</h2>
+        <button id="closeSettingButton" class="overlay-close" type="button">Close</button>
+      </div>
+
+      <section class="setting-summary">
+        <div class="setting-card">
+          <p class="meta-label">Chapter</p>
+          <p id="chapterName" class="meta-value">Chapter 1</p>
+        </div>
+        <div class="setting-card">
+          <p class="meta-label">Location</p>
+          <p id="locationName" class="meta-value">Outside the Garden</p>
+        </div>
+        <div class="setting-card">
+          <p class="meta-label">BGM</p>
+          <p id="bgmName" class="meta-value">Not started</p>
+        </div>
+        <div class="setting-card">
+          <p class="meta-label">Voice</p>
+          <p id="voiceName" class="meta-value">Not set</p>
+        </div>
+      </section>
+
+      <section class="setting-audio">
+        <label class="audio-slider-row" for="bgmVolumeRange">
+          <span class="audio-slider-label">BGM Volume</span>
+          <span id="bgmVolumeValue" class="audio-slider-value">100%</span>
+          <input id="bgmVolumeRange" class="audio-slider" type="range" min="0" max="100" step="1" value="100">
+        </label>
+        <label class="audio-slider-row" for="voiceVolumeRange">
+          <span class="audio-slider-label">Voice Volume</span>
+          <span id="voiceVolumeValue" class="audio-slider-value">100%</span>
+          <input id="voiceVolumeRange" class="audio-slider" type="range" min="0" max="100" step="1" value="100">
+        </label>
+      </section>
+
+      <section class="setting-actions">
+        <button id="galleryButton" class="ghost-button" type="button">Gallery</button>
+        <button id="returnToTitleButton" class="ghost-button" type="button">Return to Title</button>
+        <button id="muteButton" class="ghost-button" type="button">Mute</button>
+        <button id="resetButton" class="ghost-button danger" type="button">Reset Progress</button>
+      </section>
+
+      <section class="setting-chapters">
+        <div class="setting-block-title">Chapter Select</div>
+        <div id="chapterList" class="chapter-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="backlogOverlay" class="overlay-shell" hidden>
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <h2>Replay</h2>
+        <button id="closeBacklogButton" class="overlay-close" type="button">Close</button>
+      </div>
+      <div id="backlogList" class="backlog-list"></div>
+    </div>
+  </div>
+
+  <div id="galleryOverlay" class="overlay-shell" hidden>
+    <div class="overlay-panel gallery-panel">
+      <div class="overlay-header">
+        <h2>Gallery</h2>
+        <button id="closeGalleryButton" class="overlay-close" type="button">Close</button>
+      </div>
+
+      <div class="gallery-tabs" role="tablist" aria-label="Gallery Tabs">
+        <button id="galleryTabCg" class="gallery-tab is-active" type="button" role="tab" aria-selected="true">CG</button>
+        <button id="galleryTabBgm" class="gallery-tab" type="button" role="tab" aria-selected="false">BGM</button>
+      </div>
+
+      <section id="gallerySectionCg" class="gallery-section">
+        <div class="setting-block-title">CG</div>
+        <div id="galleryCgList" class="gallery-cg-list"></div>
+      </section>
+
+      <section id="gallerySectionBgm" class="gallery-section" hidden>
+        <div class="setting-block-title">BGM</div>
+        <div id="galleryBgmList" class="gallery-bgm-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="cgPreviewOverlay" class="overlay-shell" hidden>
+    <div class="overlay-panel cg-preview-panel">
+      <div class="overlay-header">
+        <div>
+          <h2 id="cgPreviewTitle">CG Preview</h2>
+          <p id="cgPreviewChapter" class="cg-preview-chapter"></p>
+        </div>
+        <button id="closeCgPreviewButton" class="overlay-close" type="button">Close</button>
+      </div>
+      <div class="cg-preview-frame">
+        <img id="cgPreviewImage" class="cg-preview-image" alt="" draggable="false">
+      </div>
+    </div>
+  </div>
+
+  <div id="creditsOverlay" class="overlay-shell" hidden>
+    <div class="overlay-panel credits-panel">
+      <div class="overlay-header">
+        <h2>Credits</h2>
+        <button id="closeCreditsButton" class="overlay-close" type="button">Close</button>
+      </div>
+
+      <section class="credits-block">
+        <p class="credits-lead">
+          After Alice is the first side-story season that continues after the ending of Alice Courtyard.
+          It follows what remains, what leaves, and what is still too unfinished to be named.
+        </p>
+      </section>
+
+      <section class="credits-block">
+        <h3>Work Statement</h3>
+        <p>
+          This build exists to present the side story in an interactive reading form. Its text, images,
+          music, staging, and interface belong to the project and its creators. Please do not repost,
+          redistribute, mirror, commercialize, extract assets, or republish any part of this build
+          without permission.
+        </p>
+      </section>
+
+      <section class="credits-block">
+        <h3>Thanks</h3>
+        <p>
+          To every ending that turned out not to be an ending. To every quiet scene that had to be
+          made large enough to breathe. And to every reader willing to follow the garden after the
+          dream has already ended.
+        </p>
+      </section>
+
+      <section class="credits-block">
+        <h3>Build Note</h3>
+        <p>
+          This is a living side-story build. The novel remains the source, and the staging, audio, CG
+          timing, menus, and presentation can continue to evolve as the world outside the garden becomes clearer.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <div id="confirmOverlay" class="overlay-shell" hidden>
+    <div class="overlay-panel confirm-panel">
+      <div class="overlay-header">
+        <h2>Start from Beginning?</h2>
+        <button id="cancelConfirmButton" class="overlay-close" type="button">Close</button>
+      </div>
+      <section class="credits-block">
+        <p class="credits-lead">
+          This will erase the current save, unlocked chapters, and gallery progress on this browser.
+        </p>
+      </section>
+      <section class="confirm-actions">
+        <button id="cancelStartButton" class="ghost-button" type="button">Cancel</button>
+        <button id="confirmStartButton" class="ghost-button danger" type="button">Erase and Restart</button>
+      </section>
+    </div>
+  </div>
+
+  <script src="./chapters/01-step-outside.js?v=20260328b"></script>
+  <script src="./chapters/02-blank-platform.js?v=20260328b"></script>
+  <script src="./chapters/03-unseen-companion.js?v=20260328b"></script>
+  <script src="./chapters/04-unnamed-domain.js?v=20260328b"></script>
+  <script src="./chapters/05-false-reboot.js?v=20260328b"></script>
+  <script src="./chapters/06-do-not-complete.js?v=20260328b"></script>
+  <script src="./chapters/07-go-out-after-waking.js?v=20260328b"></script>
+  <script src="./voice-manifest.js?v=20260405a"></script>
+  <script src="./story-data.js?v=20260328b"></script>
+  <script src="./app.js?v=20260405e"></script>
+</body>
+</html>
