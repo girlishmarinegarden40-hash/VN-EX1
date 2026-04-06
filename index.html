@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>After Alice | Side Story</title>
-  <link rel="stylesheet" href="./styles.css?v=20260405e">
+  <link rel="stylesheet" href="./styles.css?v=20260406a">
 </head>
 <body>
   <div class="app-shell">
@@ -20,6 +20,10 @@
           <button id="coverStartButton" class="cover-button" type="button">Start from Beginning</button>
           <button id="coverGalleryButton" class="cover-button ghost" type="button">Gallery</button>
           <button id="coverCreditsButton" class="cover-button ghost" type="button">Credits</button>
+        </div>
+        <div class="cover-language" aria-label="Language Switch">
+          <button id="coverLanguageZhButton" class="cover-button ghost language-button" type="button">中文</button>
+          <button id="coverLanguageEnButton" class="cover-button ghost language-button" type="button">English</button>
         </div>
       </div>
       <div class="cover-notice" aria-label="Copyright Notice">
@@ -156,6 +160,14 @@
         </label>
       </section>
 
+      <section class="setting-language">
+        <div class="setting-block-title">Language</div>
+        <div class="setting-actions setting-language-actions">
+          <button id="languageZhButton" class="ghost-button language-button" type="button">中文</button>
+          <button id="languageEnButton" class="ghost-button language-button" type="button">English</button>
+        </div>
+      </section>
+
       <section class="setting-actions">
         <button id="galleryButton" class="ghost-button" type="button">Gallery</button>
         <button id="returnToTitleButton" class="ghost-button" type="button">Return to Title</button>
@@ -280,15 +292,67 @@
     </div>
   </div>
 
-  <script src="./chapters/01-step-outside.js?v=20260328b"></script>
-  <script src="./chapters/02-blank-platform.js?v=20260328b"></script>
-  <script src="./chapters/03-unseen-companion.js?v=20260328b"></script>
-  <script src="./chapters/04-unnamed-domain.js?v=20260328b"></script>
-  <script src="./chapters/05-false-reboot.js?v=20260328b"></script>
-  <script src="./chapters/06-do-not-complete.js?v=20260328b"></script>
-  <script src="./chapters/07-go-out-after-waking.js?v=20260328b"></script>
-  <script src="./voice-manifest.js?v=20260405a"></script>
-  <script src="./story-data.js?v=20260328b"></script>
-  <script src="./app.js?v=20260405e"></script>
+  <script>
+    (function () {
+      const v = {
+        chapters: "20260328b",
+        voice:    "20260405a",
+        story:    "20260405b",
+        en:       "20260405b",
+        app:      "20260406a"
+      };
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestedLocale = urlParams.get("lang");
+      window.AliceCourtyardRequestedLocale = requestedLocale === "en" ? "en" : "zh";
+
+      const resumeFlag = urlParams.get("resume") === "1";
+      const autostartFlag = urlParams.get("autostart") === "1";
+      if (resumeFlag)    window.AliceCourtyardResume    = true;
+      if (autostartFlag) window.AliceCourtyardAutostart = true;
+
+      function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement("script");
+          s.src = src;
+          s.onload = resolve;
+          s.onerror = function () { reject(new Error("Script load failed: " + src)); };
+          document.body.appendChild(s);
+        });
+      }
+
+      var chapterSrcs = [
+        "./chapters/01-step-outside.js?v=" + v.chapters,
+        "./chapters/02-blank-platform.js?v=" + v.chapters,
+        "./chapters/03-unseen-companion.js?v=" + v.chapters,
+        "./chapters/04-unnamed-domain.js?v=" + v.chapters,
+        "./chapters/05-false-reboot.js?v=" + v.chapters,
+        "./chapters/06-do-not-complete.js?v=" + v.chapters,
+        "./chapters/07-go-out-after-waking.js?v=" + v.chapters
+      ];
+
+      async function bootstrapStory() {
+        for (var i = 0; i < chapterSrcs.length; i++) {
+          await loadScript(chapterSrcs[i]);
+        }
+        await loadScript("./voice-manifest.js?v=" + v.voice);
+
+        if (window.AliceCourtyardRequestedLocale === "en") {
+          try {
+            await loadScript("./translations/en.js?v=" + v.en);
+          } catch (e) {
+            console.warn("[EX1] English translation failed to load. Falling back to Chinese.", e);
+          }
+        }
+
+        await loadScript("./story-data.js?v=" + v.story);
+        await loadScript("./app.js?v=" + v.app);
+      }
+
+      bootstrapStory().catch(function (err) {
+        console.error("[EX1] Bootstrap error:", err);
+      });
+    })();
+  </script>
 </body>
 </html>

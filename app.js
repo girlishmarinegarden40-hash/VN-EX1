@@ -4,6 +4,44 @@
     return;
   }
 
+  const currentLanguage = String(story.locale || "").toLowerCase().startsWith("en") ? "en" : "zh";
+  const initialUrl = new URL(window.location.href);
+  const shouldResumeAfterLanguageSwitch = initialUrl.searchParams.get("resume") === "1";
+  const shouldAutoStartEntry = initialUrl.searchParams.get("autostart") === "1";
+  const isEn = currentLanguage === "en";
+
+  document.documentElement.lang = currentLanguage === "en" ? "en" : "zh-CN";
+
+  const ui_strings = isEn ? {
+    unknownLocation: "Unknown Location",
+    routeMemory: "Route Memory",
+    notRecorded: "Not recorded",
+    tripleSphere: "Three Spaces",
+    tripleSphereLabel: "Three Spaces · Concurrent",
+    narration: "Narration",
+    defaultTrap: "This is your choice. Not theirs.",
+    defaultTrapTrace: "Convergence complete",
+    alreadyTried: "Already tried",
+    letThemChoose: "Let them decide",
+    speakForThem: "Speak for them",
+    routeNote: "Not a map. Just a record of where we have already been.",
+    routeMemoryLabel: "Route Memory"
+  } : {
+    unknownLocation: "未知地点",
+    routeMemory: "路线记忆",
+    notRecorded: "未记录",
+    tripleSphere: "三空间",
+    tripleSphereLabel: "三空间 · 同时发生",
+    narration: "旁白",
+    defaultTrap: "这只是你的选择，不是她们的。",
+    defaultTrapTrace: "收束完成",
+    alreadyTried: "已经试过",
+    letThemChoose: "让她们自己选",
+    speakForThem: "替她们说完",
+    routeNote: "不是地图。只是把我们已经走过的地方，暂时记下来。",
+    routeMemoryLabel: "路线记忆"
+  };
+
   const storageKey = "after-alice-part1-progress";
   const defaultTypingSpeed = 18;
   const defaultAutoDelay = 1800;
@@ -15,6 +53,8 @@
     coverContinueButton: document.getElementById("coverContinueButton"),
     coverGalleryButton: document.getElementById("coverGalleryButton"),
     coverCreditsButton: document.getElementById("coverCreditsButton"),
+    coverLanguageZhButton: document.getElementById("coverLanguageZhButton"),
+    coverLanguageEnButton: document.getElementById("coverLanguageEnButton"),
     coverResidualMark: document.getElementById("coverResidualMark"),
     chapterName: document.getElementById("chapterName"),
     locationName: document.getElementById("locationName"),
@@ -65,6 +105,8 @@
     muteButton: document.getElementById("muteButton"),
     galleryButton: document.getElementById("galleryButton"),
     returnToTitleButton: document.getElementById("returnToTitleButton"),
+    languageZhButton: document.getElementById("languageZhButton"),
+    languageEnButton: document.getElementById("languageEnButton"),
     backlogButton: document.getElementById("backlogButton"),
     resetButton: document.getElementById("resetButton"),
     settingOverlay: document.getElementById("settingOverlay"),
@@ -118,18 +160,30 @@
   });
 
   const chapterMetaById = Object.fromEntries(chapterMeta.map((chapter) => [chapter.id, chapter]));
-  const routeSteps = [
-    { id: "garden", label: "庭院", hint: "喷泉边 / 花圃前" },
-    { id: "boundary", label: "边界小路", hint: "往海去的路" },
-    { id: "station", label: "空白站台", hint: "候车区 / 长椅区" },
-    { id: "unnamed", label: "未命名域", hint: "还没被写完的地方" },
-    { id: "fissure", label: "白缝", hint: "不可观看的缝隙" },
-    { id: "first", label: "第一空间", hint: "记录" },
-    { id: "second", label: "第二空间", hint: "结论" },
-    { id: "third", label: "第三空间", hint: "完成" },
-    { id: "world", label: "世界选择层", hint: "路径是否被采纳" },
-    { id: "sea", label: "海边", hint: "终于走到这里" },
-    { id: "return", label: "回庭院", hint: "海后的日常" }
+  const routeSteps = isEn ? [
+    { id: "garden",   label: "The Garden",         hint: "By the fountain / Before the flower bed" },
+    { id: "boundary", label: "The Boundary Path",  hint: "The road toward the sea" },
+    { id: "station",  label: "Blank Platform",      hint: "Waiting area / Bench section" },
+    { id: "unnamed",  label: "Unnamed Domain",      hint: "A place not yet finished being written" },
+    { id: "fissure",  label: "White Fissure",       hint: "A gap that cannot be observed" },
+    { id: "first",    label: "First Space",          hint: "Recording" },
+    { id: "second",   label: "Second Space",         hint: "Conclusion" },
+    { id: "third",    label: "Third Space",          hint: "Completion" },
+    { id: "world",    label: "World Choice Layer",   hint: "Whether the path is adopted" },
+    { id: "sea",      label: "The Shore",            hint: "We finally made it here" },
+    { id: "return",   label: "Back to the Garden",   hint: "Ordinary days after the sea" }
+  ] : [
+    { id: "garden",   label: "庭院",      hint: "喷泉边 / 花圃前" },
+    { id: "boundary", label: "边界小路",  hint: "往海去的路" },
+    { id: "station",  label: "空白站台",  hint: "候车区 / 长椅区" },
+    { id: "unnamed",  label: "未命名域",  hint: "还没被写完的地方" },
+    { id: "fissure",  label: "白缝",      hint: "不可观看的缝隙" },
+    { id: "first",    label: "第一空间",  hint: "记录" },
+    { id: "second",   label: "第二空间",  hint: "结论" },
+    { id: "third",    label: "第三空间",  hint: "完成" },
+    { id: "world",    label: "世界选择层", hint: "路径是否被采纳" },
+    { id: "sea",      label: "海边",      hint: "终于走到这里" },
+    { id: "return",   label: "回庭院",    hint: "海后的日常" }
   ];
   const routeStepIds = new Set(routeSteps.map((step) => step.id));
   const preBranchRouteIds = ["garden", "boundary", "station", "unnamed", "fissure"];
@@ -217,9 +271,18 @@
   buildRouteMap();
   bindEvents();
   syncAudioControls();
+  syncLanguageControls();
   applyAudioMix();
   preloadChapterVoices(story.lines[state.index]?.chapterId);
+
+  const routeNoteEl = document.querySelector(".route-panel-note");
+  if (routeNoteEl) {
+    routeNoteEl.textContent = ui_strings.routeNote;
+  }
+
   openCover();
+  resumeAfterLanguageSwitchIfNeeded();
+  autoStartIfNeeded();
 
   function saveProgress() {
     const payload = {
@@ -235,6 +298,10 @@
       voiceMasterVolume: state.voiceMasterVolume
     };
     window.localStorage.setItem(storageKey, JSON.stringify(payload));
+  }
+
+  function hasStoredProgress() {
+    return Boolean(window.localStorage.getItem(storageKey));
   }
 
   function bindEvents() {
@@ -336,6 +403,23 @@
       syncAudioControls();
       applyAudioMix();
       saveProgress();
+    });
+
+    [
+      [ui.coverLanguageZhButton, "zh"],
+      [ui.coverLanguageEnButton, "en"],
+      [ui.languageZhButton, "zh"],
+      [ui.languageEnButton, "en"]
+    ].forEach(([button, language]) => {
+      if (!button) {
+        return;
+      }
+
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        playUiClick();
+        switchLanguage(language);
+      });
     });
 
     ui.returnToTitleButton.addEventListener("click", (event) => {
@@ -713,7 +797,7 @@
       }
       button.innerHTML = `
         <span class="choice-option-label">${option.label || "……"}</span>
-        <span class="choice-option-note">${isUsed ? "已经试过" : option.note || (option.result === "continue" ? "让她们自己选" : "替她们说完")}</span>
+        <span class="choice-option-note">${isUsed ? ui_strings.alreadyTried : option.note || (option.result === "continue" ? ui_strings.letThemChoose : ui_strings.speakForThem)}</span>
       `;
       button.addEventListener("click", (event) => {
         event.preventDefault();
@@ -736,13 +820,13 @@
 
     if (option.result === "trap") {
       markChoiceOptionUsed(line.choiceId, option.id);
-      state.lastTrapTraces.push(option.traceText || "收束完成");
+      state.lastTrapTraces.push(option.traceText || ui_strings.defaultTrapTrace);
       saveProgress();
       clearChoicePanel();
       clearAutoTimer();
       clearLineEffects();
-      ui.speakerTag.textContent = option.speaker || "旁白";
-      ui.dialogueText.textContent = option.trapMessage || "这只是你的选择，不是她们的。";
+      ui.speakerTag.textContent = option.speaker || ui_strings.narration;
+      ui.dialogueText.textContent = option.trapMessage || ui_strings.defaultTrap;
       ui.textboxHint.textContent = "Read it";
       state.typingDone = true;
 
@@ -789,7 +873,7 @@
     node.innerHTML = `
       <div class="route-node-mark" aria-hidden="true"></div>
       <div class="route-node-label">???</div>
-      <div class="route-node-hint">未记录</div>
+      <div class="route-node-hint">${ui_strings.notRecorded}</div>
     `;
     routeNodeElements.set(id, node);
     return node;
@@ -801,7 +885,7 @@
     node.innerHTML = `
       <div class="route-node-mark" aria-hidden="true"></div>
       <div class="route-node-label">???</div>
-      <div class="route-node-hint">未记录</div>
+      <div class="route-node-hint">${ui_strings.notRecorded}</div>
     `;
     return node;
   }
@@ -819,7 +903,7 @@
         labelEl.textContent = "???";
       }
       if (hintEl) {
-        hintEl.textContent = "未记录";
+        hintEl.textContent = ui_strings.notRecorded;
       }
       return;
     }
@@ -895,8 +979,8 @@
 
     routeBranchShell = document.createElement("section");
     routeBranchShell.className = "route-branch-shell";
-    routeBranchShell.setAttribute("aria-label", "三空间");
-    routeBranchShell.dataset.label = "三空间 · 同时发生";
+    routeBranchShell.setAttribute("aria-label", ui_strings.tripleSphere);
+    routeBranchShell.dataset.label = ui_strings.tripleSphereLabel;
 
     const header = document.createElement("div");
     header.className = "route-branch-header";
@@ -933,37 +1017,37 @@
   function resolveRouteStepId(line, chapter) {
     const source = String(line.location || chapter?.location || "");
 
-    if (/世界选择层/.test(source)) {
+    if (/世界选择层|World Choice Layer/i.test(source)) {
       return "world";
     }
-    if (/第三空间/.test(source)) {
+    if (/第三空间|Third Space/i.test(source)) {
       return "third";
     }
-    if (/第二空间/.test(source)) {
+    if (/第二空间|Second Space/i.test(source)) {
       return "second";
     }
-    if (/第一空间/.test(source)) {
+    if (/第一空间|First Space/i.test(source)) {
       return "first";
     }
-    if (/白缝/.test(source)) {
+    if (/白缝|White Fissure/i.test(source)) {
       return "fissure";
     }
-    if (/(无名回廊|未命名域|残留区域)/.test(source)) {
+    if (/(无名回廊|未命名域|残留区域|Unnamed Domain|Nameless Corridor)/i.test(source)) {
       return "unnamed";
     }
-    if (/(空白站台|边缘站台|月台|站台|站牌|候车|长椅)/.test(source)) {
+    if (/(空白站台|边缘站台|月台|站台|站牌|候车|长椅|Blank Platform|Edge Station)/i.test(source)) {
       return "station";
     }
-    if (/(边界小路|边界尽头|泉台途中)/.test(source)) {
+    if (/(边界小路|边界尽头|泉台途中|Boundary Path)/i.test(source)) {
       return "boundary";
     }
-    if (/(海边|海岸|海边的路|海边之后|海边后侧)/.test(source)) {
+    if (/(海边|海岸|海边的路|海边之后|海边后侧|The Shore|Shore and the Garden)/i.test(source)) {
       return "sea";
     }
-    if (/(回程|庭院入夜前|庭院回廊|庭院深夜|海边与庭院|长桌尽头|回廊最深处)/.test(source)) {
+    if (/(回程|庭院入夜前|庭院回廊|庭院深夜|海边与庭院|长桌尽头|回廊最深处|Back to the Garden)/i.test(source)) {
       return "return";
     }
-    if (/(梦醒后的庭院|喷泉边|花圃前|回廊口|庭院外缘)/.test(source)) {
+    if (/(梦醒后的庭院|喷泉边|花圃前|回廊口|庭院外缘|Garden After Alice|The Garden)/i.test(source)) {
       return "garden";
     }
 
@@ -974,8 +1058,8 @@
     const routeStepId = resolveRouteStepId(line, chapter);
     state.currentRouteStepId = routeStepId;
     state.visitedRouteSteps.add(routeStepId);
-    ui.routeBadgeCurrent.textContent = sceneLabel || routeSteps.find((step) => step.id === routeStepId)?.label || "未知地点";
-    ui.routePanelTitle.textContent = chapter ? `${chapter.title} · 路线记忆` : "Route Memory";
+    ui.routeBadgeCurrent.textContent = sceneLabel || routeSteps.find((step) => step.id === routeStepId)?.label || ui_strings.unknownLocation;
+    ui.routePanelTitle.textContent = chapter ? `${chapter.title} · ${ui_strings.routeMemoryLabel}` : ui_strings.routeMemory;
     ui.routePanelLocation.textContent = sceneLabel || routeSteps.find((step) => step.id === routeStepId)?.label || "";
     syncRouteMapState();
   }
@@ -1944,6 +2028,50 @@
     ui.voiceVolumeValue.textContent = `${Math.round(state.voiceMasterVolume * 100)}%`;
   }
 
+  function syncLanguageControls() {
+    [
+      [ui.coverLanguageZhButton, "zh"],
+      [ui.coverLanguageEnButton, "en"],
+      [ui.languageZhButton, "zh"],
+      [ui.languageEnButton, "en"]
+    ].forEach(([button, language]) => {
+      if (!button) {
+        return;
+      }
+
+      const isActive = currentLanguage === language;
+      button.classList.toggle("is-active", isActive);
+      button.disabled = isActive;
+      button.setAttribute("aria-pressed", String(isActive));
+    });
+  }
+
+  function switchLanguage(language) {
+    if (!language || language === currentLanguage) {
+      return;
+    }
+
+    saveProgress();
+
+    const nextUrl = new URL(window.location.href);
+
+    if (language === "en") {
+      nextUrl.searchParams.set("lang", "en");
+      nextUrl.searchParams.delete("locale");
+    } else {
+      nextUrl.searchParams.delete("lang");
+      nextUrl.searchParams.delete("locale");
+    }
+
+    if (hasStoredProgress() || hasSavedProgress()) {
+      nextUrl.searchParams.set("resume", "1");
+    } else {
+      nextUrl.searchParams.delete("resume");
+    }
+
+    window.location.assign(nextUrl.toString());
+  }
+
   function applyAudioMix() {
     bgmAudio.volume = state.muted ? 0 : getEffectiveBgmVolume();
     galleryAudio.volume = state.muted ? 0 : getEffectiveBgmVolume();
@@ -2486,6 +2614,40 @@
     setSystemTextboxHidden(false);
     starter();
     return true;
+  }
+
+  function resumeAfterLanguageSwitchIfNeeded() {
+    if (!shouldResumeAfterLanguageSwitch || !(hasStoredProgress() || hasSavedProgress())) {
+      return;
+    }
+
+    const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.delete("resume");
+
+    if (window.history && typeof window.history.replaceState === "function") {
+      window.history.replaceState({}, "", nextUrl.toString());
+    }
+
+    state.coverActive = false;
+    setOverlay(ui.coverOverlay, false);
+    renderCurrentLine(false);
+  }
+
+  function autoStartIfNeeded() {
+    if (!shouldAutoStartEntry || hasStoredProgress() || hasSavedProgress()) {
+      return;
+    }
+
+    const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.delete("autostart");
+
+    if (window.history && typeof window.history.replaceState === "function") {
+      window.history.replaceState({}, "", nextUrl.toString());
+    }
+
+    state.coverActive = false;
+    setOverlay(ui.coverOverlay, false);
+    resetProgress();
   }
 
   function openCover() {
